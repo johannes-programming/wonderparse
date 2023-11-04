@@ -5,7 +5,7 @@ wonderparse
 Overview
 --------
 
-easy cooperation between main-function and argparse
+The wonderparse project allows for easy cooperation between a main-function/an object that hold the central functions on the one side and argparse on the other.
 
 Installation
 ------------

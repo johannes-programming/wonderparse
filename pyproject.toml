@@ -6,11 +6,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wonderparse"
-version = "0.0.0"
+version = "1.0.1"
 description = "easy cooperation between main-function and argparse"
 readme = "README.rst"
 authors = [
-    { name = "Johannes", email = "johannes-programming@posteo.org" },
+    { name = "Johannes Programming", email = "johannes-programming@posteo.org" },
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -18,8 +18,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 keywords = []
-dependencies = []
+dependencies = [
+    "funcinputs>=1.0.0",
+]
 requires-python = ">=3.11"
 
 [project.license]
 file = "LICENSE.txt"
+
+[project.urls]
+source = "https://github.com/johannes-programming/wonderparse"
