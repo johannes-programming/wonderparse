@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wonderparse"
-version = "1.0.1"
+version = "1.0.2"
 description = "easy cooperation between main-function and argparse"
 readme = "README.rst"
 authors = [
@@ -19,7 +19,7 @@ classifiers = [
 ]
 keywords = []
 dependencies = [
-    "funcinputs>=1.0.0",
+    "funcinputs>=1.0",
 ]
 requires-python = ">=3.11"
 

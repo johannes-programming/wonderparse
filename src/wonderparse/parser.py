@@ -70,7 +70,7 @@ def by_parameter(parameter, /, **kwargs):
         if 'option_strings' not in detailsA.keys():
             prefix_chars = kwargs.get('prefix_chars', "-")
             prefix_char = prefix_chars[0]
-            option_string = f"_{parameter.name}"
+            option_string = f"__{parameter.name}"
             option_string = option_string.replace('_', prefix_char)
             detailsA['option_strings'] = [option_string]
         if parameter.default is _ins.Parameter.empty:
