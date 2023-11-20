@@ -74,6 +74,12 @@ License
 
 This project is licensed under the MIT License.
 
+Links
+-----
+
+* `Download <https://pypi.org/project/wonderparse/#files>`_
+* `Source <https://github.com/johannes-programming/wonderparse>`_
+
 Credits
 -------
 - Author: Johannes
