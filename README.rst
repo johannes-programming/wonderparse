@@ -19,7 +19,7 @@ To install wonderparse, you can use `pip`. Open your terminal and run:
 Usage
 -----
 
-The code from the expit project
+The code from the expit project.
 
 .. code-block:: python
 
@@ -82,6 +82,7 @@ Links
 
 Credits
 -------
+
 - Author: Johannes
 - Email: johannes-programming@posteo.org
 

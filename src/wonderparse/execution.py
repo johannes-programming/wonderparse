@@ -1,12 +1,31 @@
-def by_object(obj, /, *, funcInput):
-    func = by_holder if hasattr(obj, "_dest") else by_func
-    return func(obj, funcInput=funcInput)
+import inspect as _ins
+import typing as _typing
 
-def by_holder(obj, /, *, funcInput):
+
+def by_object(value, /, *, funcInput):
+    func = by_holder if hasattr(value, "_dest") else by_func
+    return func(value, funcInput=funcInput)
+
+def by_holder(value, /, *, funcInput):
     funcInput = funcInput.copy()
     cmd = funcInput.pop(0)
-    obj = getattr(obj, cmd)
-    return by_object(obj, funcInput=funcInput)
+    value = getattr(value, cmd)
+    return by_object(
+        value, 
+        funcInput=funcInput,
+    )
 
-def by_func(obj, /, *, funcInput):
-    return funcInput.exec(obj)
+def by_func(value, /, *, funcInput):
+    ans = funcInput.exec(value)
+    sig = _ins.signature(value)
+    outtype = sig.return_annotation
+    if outtype in [_ins.Parameter.empty, _typing.Any]:
+        return ans
+    if outtype is not None:
+        return outtype(ans)
+    if ans is None:
+        return None
+    raise ValueError(f"""\
+The function {value.__name__} returned {ans}, \
+but it's return annotation is None.""")
+
