@@ -11,9 +11,9 @@ def _get_prefix_char(parser):
     except IndexError:
         return None
 
-def by_object(obj, /, **kwargs):
-    func = by_holder if hasattr(obj, "_dest") else by_func
-    return func(obj, **kwargs)
+def by_object(value, /, **kwargs):
+    func = by_holder if hasattr(value, "_dest") else by_func
+    return func(value, **kwargs)
 
 def by_holder(obj, /, **kwargs):
     parents_kwargs = dict(kwargs)
@@ -44,7 +44,12 @@ def by_holder(obj, /, **kwargs):
         )
     return ans
 
-def by_func(value, /, **kwargs):
+def by_func(
+    value, 
+    /, 
+    *,
+    **kwargs,
+):
     ans = _ap.ArgumentParser(
         description=value.__doc__,
         **kwargs,

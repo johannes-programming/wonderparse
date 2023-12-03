@@ -6,11 +6,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wonderparse"
-version = "1.2.0"
+version = "1.3.2"
 description = "easy cooperation between main-function and argparse"
 readme = "README.rst"
 authors = [
-    { name = "Johannes Programming", email = "johannes-programming@posteo.org" },
+    { name = "Johannes", email = "johannes-programming@posteo.org" },
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",

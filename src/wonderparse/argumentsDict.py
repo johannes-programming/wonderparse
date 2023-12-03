@@ -37,9 +37,10 @@ def by_parameter(parameter, /, *, prefix_char=None):
         argumentDictB['default'] = tuple()
     elif kind is _ins.Parameter.KEYWORD_ONLY:
         if 'option_strings' not in argumentDictA.keys():
-            option_string = _option_string.by_dest_and_prefix_char(
-                parameter.name,
-                prefix_char,
+            option_string = _option_string.by_dest_metavar_and_prefix_char(
+                dest=parameter.name,
+                metavar=argumentDictA.get('metavar'),
+                prefix_char=prefix_char,
             )
             argumentDictA['option_strings'] = [option_string]
         if parameter.default is _ins.Parameter.empty:

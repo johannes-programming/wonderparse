@@ -4,20 +4,20 @@ import inspect as _ins
 import funcinputs as _fi
 
 
-def by_object(obj, /, *, namespace):
-    func = by_holder if hasattr(obj, "_dest") else by_func
-    return func(obj, namespace=namespace)
+def by_object(value, /, **kwargs):
+    func = by_holder if hasattr(value, "_dest") else by_func
+    return func(value, **kwargs)
 
-def by_holder(obj, /, *, namespace):
+def by_holder(value, /, *, namespace, **kwargs):
     cmd = _popattr(namespace, obj._dest)
     ansA = _fi.FuncInput(args=[cmd])
     subobj = getattr(obj, cmd)
-    ansB = by_object(subobj, namespace=namespace)
+    ansB = by_object(subobj, namespace=namespace, **kwargs)
     return ansA + ansB
 
-def by_func(obj, /, *, namespace):
+def by_func(value, /, *, namespace):
     ans = _fi.FuncInput()
-    signature = _ins.signature(obj)
+    signature = _ins.signature(value)
     for n, p in signature.parameters.items():
         ans += by_parameter(p, namespace=namespace)
     return ans

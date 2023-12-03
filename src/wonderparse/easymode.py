@@ -12,7 +12,10 @@ def simple_run(*,
     endgame = _endgame(endgame)
     parser = _parser.by_object(program_object, **kwargs)
     ns = parser.parse_args(args)
-    funcInput = _process_namespace.by_object(program_object, namespace=ns)
+    funcInput = _process_namespace.by_object(
+        program_object, 
+        namespace=ns,
+    )
     if len(vars(ns)):
         raise ValueError(f"Some arguments in the namespace were not processed: {ns}")
     try:
@@ -24,6 +27,17 @@ def simple_run(*,
         )
         raise SystemExit(msg)
     return endgame(result)
+
+def _execution_by_object(value, /, *, funcInput):
+    try:
+        return _execution.by_object(value, funcInput=funcInput)
+    except Exception as exc:
+        msg = _exit_msg(
+            prog=kwargs.get('prog'),
+            exc=exc,
+        )
+        raise SystemExit(msg)
+
 
 def _exit_msg(
     *,

@@ -21,6 +21,8 @@ def by_func(value, /, *, funcInput):
     outtype = sig.return_annotation
     if outtype in [_ins.Parameter.empty, _typing.Any]:
         return ans
+    if type(ans) is outtype:
+        return ans
     if outtype is not None:
         return outtype(ans)
     if ans is None:
