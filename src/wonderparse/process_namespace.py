@@ -1,64 +1,72 @@
-import argparse as _ap
 import inspect as _ins
+import typing as _typing
 
 import funcinputs as _fi
 
+from . import _autosaving_utils
+from . import argumentDict as _argumentDict
+from . import argumentsDict as _argumentsDict
+from ._parameter_utils import Kind as _Kind
 
-def by_object(value, /, **kwargs):
+
+def by_object(value, /, **kwargs) -> _fi.FuncInput:
     func = by_holder if hasattr(value, "_dest") else by_func
     return func(value, **kwargs)
 
-def by_holder(value, /, *, namespace, **kwargs):
-    cmd = _popattr(namespace, obj._dest)
+def by_holder(value, /, *, namespace, **kwargs) -> _fi.FuncInput:
+    cmd = by_dest(
+        value._dest,
+        namespace=namespace,
+    )
     ansA = _fi.FuncInput(args=[cmd])
-    subobj = getattr(obj, cmd)
+    subobj = getattr(value, cmd)
     ansB = by_object(subobj, namespace=namespace, **kwargs)
     return ansA + ansB
 
-def by_func(value, /, *, namespace):
-    ans = _fi.FuncInput()
-    signature = _ins.signature(value)
-    for n, p in signature.parameters.items():
-        ans += by_parameter(p, namespace=namespace)
-    return ans
-            
-def by_parameter(parameter, /, *, namespace):
-    if parameter.kind is _ins.Parameter.VAR_KEYWORD:
-        return by_var_keyword_parameter_annotation(
-            parameter.annotation, 
+@_autosaving_utils.By_func_deco
+class by_func:
+    @classmethod
+    def without_autoSave(cls, value, /, *, namespace) -> _fi.FuncInput:
+        ans = _fi.FuncInput()
+        signature = _ins.signature(value)
+        for n, p in signature.parameters.items():
+            ans += by_parameter(p, namespace=namespace)
+        return ans
+    @classmethod
+    def with_autoSave(cls, value, /, *, namespace, autoSave) -> _fi.FuncInput:
+        ansA = cls.without_autoSave(
+            value,
             namespace=namespace,
         )
-    value = _popattr(namespace, parameter.name)
-    if parameter.kind in (_ins.Parameter.POSITIONAL_ONLY, _ins.Parameter.POSITIONAL_OR_KEYWORD):
-        return _fi.FuncInput(args=[value])
-    elif parameter.kind is _ins.Parameter.VAR_POSITIONAL:
-        return _fi.FuncInput(args=value)
-    elif parameter.kind is _ins.Parameter.KEYWORD_ONLY:
-        return _fi.FuncInput(kwargs={parameter.name:value})
-    raise ValueError
+        autoSaveHandler = by_dest(
+            autoSave.dest,
+            namespace=namespace,
+        )
+        if _argumentDict.is_optional(autoSave.argumentDict):
+            ansB = _fi.FuncInput(kwargs={autoSave.dest:autoSaveHandler})
+        else:
+            ansB = _fi.FuncInput(args=[autoSaveHandler])
+        return ansA + ansB
+            
+def by_parameter(value, /, *, namespace) -> _fi.FuncInput:
+    kind = _Kind.get(value)
+    if kind == _Kind.VAR_KEYWORD:
+        argumentsDict = _argumentsDict.by_annotation(value.annotation)
+        keys = argumentsDict.keys()
+        keys = list(keys)
+        kwargs = {k:by_dest(k, namespace=namespace) for k in keys}
+        ans = _fi.FuncInput(kwargs=kwargs)
+        return ans
+    v = by_dest(value.name, namespace=namespace)
+    if kind == _Kind.SIMPLY_POSITIONAL:
+        return _fi.FuncInput(args=[v])
+    if kind == _Kind.VAR_POSITIONAL:
+        return _fi.FuncInput(args=v)
+    if kind == _Kind.KEYWORD_ONLY:
+        return _fi.FuncInput(kwargs={value.name:v})
+    raise NotImplementedError
 
-def by_var_keyword_parameter_annotation(annotation, /, *, namespace):
-    if annotation is _ins.Parameter.empty:
-        dests = list()
-    elif type(annotation) is list:
-        dests = list()
-        for details in annotation:
-            info = _fi.FuncInput(kwargs=details)
-            info.args = info.pop('option_strings', [])
-            parser = _ap.ArgumentParser()
-            action = info.exec(parser.add_argument)
-            dests.append(action.dest)
-    elif type(annotation) is dict:
-        dests = list(annotation.keys())
-    else:
-        raise TypeError
-    ans = _fi.FuncInput()
-    for dest in dests:
-        value = _popattr(namespace, dest)
-        ans += _fi.FuncInput(kwargs={dest:value})
-    return ans
-
-def _popattr(namespace, attrname):
-    ans = getattr(namespace, attrname)
-    delattr(namespace, attrname)
+def by_dest(value, /, *, namespace) -> _typing.Any:
+    ans = getattr(namespace, value)
+    delattr(namespace, value)
     return ans

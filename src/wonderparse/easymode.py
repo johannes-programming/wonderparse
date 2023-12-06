@@ -1,6 +1,7 @@
-import wonderparse.execution as _execution
-import wonderparse.parser as _parser
-import wonderparse.process_namespace as _process_namespace
+from . import autosaving as _autosaving
+from . import execution as _execution
+from . import parser as _parser
+from . import process_namespace as _process_namespace
 
 
 def simple_run(*, 
@@ -9,35 +10,34 @@ def simple_run(*,
     endgame='print',
     **kwargs,
 ):
-    endgame = _endgame(endgame)
-    parser = _parser.by_object(program_object, **kwargs)
+    finalTouch = _finalTouch(endgame)
+    autoSave = _autoSave(endgame)
+    parser = _parser.by_object(
+        program_object, 
+        autoSave=autoSave,
+        **kwargs,
+    )
     ns = parser.parse_args(args)
     funcInput = _process_namespace.by_object(
         program_object, 
         namespace=ns,
+        autoSave=autoSave,
     )
     if len(vars(ns)):
         raise ValueError(f"Some arguments in the namespace were not processed: {ns}")
     try:
-        result = _execution.by_object(program_object, funcInput=funcInput)
+        result = _execution.by_object(
+            program_object, 
+            funcInput=funcInput,
+            autoSave=autoSave,
+        )
     except Exception as exc:
         msg = _exit_msg(
             prog=kwargs.get('prog'),
             exc=exc,
         )
         raise SystemExit(msg)
-    return endgame(result)
-
-def _execution_by_object(value, /, *, funcInput):
-    try:
-        return _execution.by_object(value, funcInput=funcInput)
-    except Exception as exc:
-        msg = _exit_msg(
-            prog=kwargs.get('prog'),
-            exc=exc,
-        )
-        raise SystemExit(msg)
-
+    return finalTouch(result)
 
 def _exit_msg(
     *,
@@ -51,7 +51,14 @@ def _exit_msg(
     msg = f"{msgA}: {exc}"
     return msg
 
-def _endgame(value):
+def _autoSave(value, /):
+    if type(value) is _autosaving.AutoSave:
+        return value
+    return None
+
+def _finalTouch(value, /):
+    if type(value) is _autosaving.AutoSave:
+        return _return
     if type(value) is not str:
         return value
     if value == 'print':

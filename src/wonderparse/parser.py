@@ -15,39 +15,41 @@ def by_object(value, /, **kwargs):
     func = by_holder if hasattr(value, "_dest") else by_func
     return func(value, **kwargs)
 
-def by_holder(obj, /, **kwargs):
-    parents_kwargs = dict(kwargs)
+def by_holder(value, /, **kwargs):
     ans = _ap.ArgumentParser(
-        description=obj.__doc__,
+        description=value.__doc__,
         **kwargs,
     )
-    subparsers = ans.add_subparsers(dest=obj._dest, required=True)
-    for n, m in _ins.getmembers(obj):
+    subparsers = ans.add_subparsers(dest=value._dest, required=True)
+    for n, m in _ins.getmembers(value):
         if n.startswith("_"):
             continue
         cmd = n
         prefix_char = _get_prefix_char(ans)
         if prefix_char is not None:
             cmd = cmd.replace('_', prefix_char)
-        parents_kwargs['prog'] = cmd
+        inner_kwargs = dict(kwargs)
+        inner_kwargs.pop('parents', None)
+        inner_kwargs['prog'] = cmd
         parent = by_object(
             m,
-            prog=cmd,
-            **parents_kwargs,
+            **inner_kwargs,
         )
+        inner_kwargs['description'] = parent.description
+        inner_kwargs['add_help'] = False
+        inner_kwargs.pop('autoSave', None)
         subparser = subparsers.add_parser(
             cmd,
             parents=[parent],
-            add_help=False,
-            prog=parent.prog,
-            description=parent.description,
+            **inner_kwargs,
         )
     return ans
 
 def by_func(
     value, 
     /, 
-    *,
+    *, 
+    autoSave=None,
     **kwargs,
 ):
     ans = _ap.ArgumentParser(
@@ -58,6 +60,7 @@ def by_func(
     argumentsDict = _argumentsDict.by_func(
         value, 
         prefix_char=prefix_char,
+        autoSave=autoSave,
     )
     _argumentsDict.add_to_parser(
         argumentsDict,

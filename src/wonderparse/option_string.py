@@ -1,4 +1,3 @@
-
 def by_dest_metavar_and_prefix_char(dest, metavar, prefix_char):
     if metavar is str:
         dest = metavar
