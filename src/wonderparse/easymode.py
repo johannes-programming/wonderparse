@@ -8,6 +8,7 @@ def simple_run(*,
     args, 
     program_object,
     endgame='print',
+    edit_namespace=None,
     **kwargs,
 ):
     finalTouch = _finalTouch(endgame)
@@ -18,6 +19,8 @@ def simple_run(*,
         **kwargs,
     )
     ns = parser.parse_args(args)
+    if edit_namespace is not None:
+        edit_namespace(ns)
     funcInput = _process_namespace.by_object(
         program_object, 
         namespace=ns,
